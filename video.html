@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+    <head>
+
+
+    </head>
+    <body>
+
+        <p>Hello world! This is HTML5 Boilerplate.</p>
+
+<script>
+
+para = window.location.search.substring(1);
+temp=para.split('=');
+videoName=temp[1];
+</script>
+
+<video 
+  id="videoPlayer" 
+  width="200" height="100"
+  data-setup='{}'
+  autoplay
+  controls>
+
+  <source id="videoSource">
+</video>
+<label id="delay"></label>
+<label id="buffer"></label>
+<label id="lagLength">not used</label>
+<label id="duration">-1</label>
+<script>
+var time0=null, timeCanPlay=null, delay=-1;
+var duration  = -1;
+var delayLabel=document.getElementById("delay");
+var bufferLabel=document.getElementById("buffer");
+//var currentLabel=document.getElementById("current");
+
+var lagLengthLabel=document.getElementById("lagLength");
+var durationLabel=document.getElementById("duration");
+
+var vid=document.getElementById("videoPlayer");
+var vsrc=document.getElementById("videoSource");
+var videoStatus=null //null-not bexgin yet, 1-playing, 0-pausing
+var lagLength=0, startLagTime=null, enLagTime=null;
+
+
+init();
+
+function init(){
+		vsrc.src="videoSrc/"+videoName;
+		vid.load();
+		time0=new Date();
+		vid.oncanplay = function(){   //get start delay
+			if (delay == -1){
+				timeCanPlay=new Date();
+				delay=timeCanPlay.getTime()-time0.getTime();
+				//alert(delay);
+				delayLabel.innerHTML=delay;
+			//	updateVideoStatus("1");
+			}
+		}
+
+		vid.onloadedmetadata = function(){
+			duration = Math.round(vid.duration);
+			updateDuration(duration);
+		}
+
+		var bufferInterval=setInterval("updateBuffer(getBuffer())",1000);
+		//var currentInterval=setInterval("updateCurrent(getCurrent())",1000);
+		/*vid.onstalled = function(){ // lag begins
+			if (videoStatus == 1){ //if playing before
+				startLagTime=new Date();
+				updateVideoStatus(0);
+			}
+		}
+		vid.onwaiting = function(){ // lag begins
+                        if (videoStatus == 1){ //if playing before
+                                startLagTime=new Date();
+                                updateVideoStatus(0);
+                        }
+                }
+		vid.onprogress = function(){ //lag ends
+			if (videoStatus == 0){ //if stalled before
+				endLagTime=new Date();
+				lagLength += endLagTime.getTime()-startLagTime.getTime();
+				//updateLagLength(lagLength);
+				updateVideoStatus(1);
+			}
+		}
+		*/
+		
+                vid.onended = function(){
+			clearInterval(bufferInterval);
+			clearInterval(currentInterval);
+			updateBuffer("-1 -1 -1");
+			//updateCurrent(-1);
+		//	updateVideoStatus(-1);
+		}
+
+}
+
+function updateBuffer(value){
+	bufferLabel.innerHTML=value;
+}
+//function updateCurrent(value){
+//	currentLabel.innerHTML=value;
+//}
+
+function updateDuration(value){
+	durationLabel.innerHTML=value;
+}
+function updateLagLength(value){
+	lagLengthLabel.innerHTML=value;
+}
+
+function updateVideoStatus(value){
+	videoStatus=value;
+	videoStatusLabel.innerHTML=value;
+}
+
+function getBuffer(){  //get buffer level
+    var howMuch = vid.buffered.end(0);
+    var whereYouAt = vid.currentTime;
+    //alert(howMuch + " " + whereYouAt + " " + (howMuch - whereYouAt));
+    return Math.round(whereYouAt)+" "+Math.round(howMuch)+" "+Math.round(howMuch-whereYouAt);
+}
+
+//function getCurrent(){ //get current play time
+//	return Math.round(vid.currentTime);
+//}
+function getDelay(){   //display start delay
+	//alert(delay);
+	return delay;
+}
+
+function getLagLength(){
+	//alert(lagLength);
+	return lagLength;
+}
+
+</script>
+<button type="button" onclick="getBuffer()">buffer</button>
+<button type="button" onclick="getDelay()">delay</button>
+<button type="button" onclick="alert(vid.play)">lag length</button>
+
+    </body>
+</html>
+
+
+
